@@ -1,4 +1,3 @@
-![fee5a069-453b-4e67-bd83-70710104a4d3](https://github.com/user-attachments/assets/08d6ff64-cbc1-4101-8746-a4813210cc36)
 # PostgreSQL High Availability Cluster with Patroni
 
 This guide provides step-by-step instructions for deploying a **high availability PostgreSQL cluster** using **Patroni**, **etcd**, and **HAProxy**, designed for production environments such as monitoring platforms like **Zabbix**.
