@@ -1,4 +1,4 @@
-
+![fee5a069-453b-4e67-bd83-70710104a4d3](https://github.com/user-attachments/assets/08d6ff64-cbc1-4101-8746-a4813210cc36)
 # PostgreSQL High Availability Cluster with Patroni
 
 This guide provides step-by-step instructions for deploying a **high availability PostgreSQL cluster** using **Patroni**, **etcd**, and **HAProxy**, designed for production environments such as monitoring platforms like **Zabbix**.
@@ -27,6 +27,9 @@ The cluster consists of **four servers**:
 | Load Balancer     | HAProxy + etcd                         |
 | Database Node 1   | PostgreSQL + Patroni + etcd            |
 | Database Node 2   | PostgreSQL + Patroni + etcd            |
+
+![ChatGPT Image Jun 28, 2025, 03_16_05 PM](https://github.com/user-attachments/assets/796db09b-136b-4661-a8aa-67ca3a5a496a)
+
 
 **Traffic Flow**  
 Zabbix sends traffic to HAProxy on ports like `5000`, `5001`, or `5002`. HAProxy uses HTTP health checks (`/master`, `/replica`) on port `8008` to determine the **Patroni leader node**, and forwards read/write traffic accordingly.
