@@ -1,3 +1,4 @@
+
 # PostgreSQL High Availability Cluster with Patroni
 
 This guide provides step-by-step instructions for deploying a **high availability PostgreSQL cluster** using **Patroni**, **etcd**, and **HAProxy**, designed for production environments such as monitoring platforms like **Zabbix**.
@@ -40,13 +41,11 @@ Zabbix sends traffic to HAProxy on ports like `5000`, `5001`, or `5002`. HAProxy
 
 ```bash
 sudo apt install haproxy
+```
 
+### Example `/etc/haproxy/haproxy.cfg`
 
-Example /etc/haproxy/haproxy.cfg
-haproxy
-Copy
-Edit
-
+```haproxy
 global
     maxconn 1000
 
@@ -78,25 +77,25 @@ listen standby
     http-check expect status 200
     server pg_node1 <DB1_IP>:5432 check port 8008
     server pg_node2 <DB2_IP>:5432 check port 8008
+```
 
-
+---
 
 ## 2️⃣ etcd Installation (on all 3 etcd nodes)
-## Install from Binary
-bash
-Copy
-Edit
 
+### Install from Binary
+
+```bash
 wget https://github.com/etcd-io/etcd/releases/download/v3.4.20/etcd-v3.4.20-linux-amd64.tar.gz
 tar -zxvf etcd-v3.4.20-linux-amd64.tar.gz
 mv etcd-v3.4.20-linux-amd64 etcd
 cd etcd
 sudo mv etcd etcdctl /usr/local/bin/
+```
 
-Create systemd Service
-ini
-Copy
-Edit
+### Create systemd Service
+
+```ini
 # /etc/systemd/system/etcd.service
 [Unit]
 Description=ETCD
@@ -110,11 +109,11 @@ Type=simple
 
 [Install]
 WantedBy=multi-user.target
+```
 
-Sample Configuration /etc/etcd/etcd.conf.yaml
-yaml
-Copy
-Edit
+### Sample Configuration `/etc/etcd/etcd.conf.yaml`
+
+```yaml
 name: db1
 data-dir: /var/lib/etcd
 listen-peer-urls: "http://<DB1_IP>:2380"
@@ -124,36 +123,41 @@ initial-cluster-state: "new"
 initial-cluster-token: etcd-cluster-token
 enable-grpc-gateway: true
 enable-v2: true
+```
 
-Start Service
-bash
-Copy
-Edit
+### Start Service
+
+```bash
 systemctl daemon-reexec
 systemctl start etcd
+```
 
-3️⃣ PostgreSQL & Patroni Setup (DB Nodes)
-Install PostgreSQL 14
-bash
-Copy
-Edit
+---
+
+## 3️⃣ PostgreSQL & Patroni Setup (DB Nodes)
+
+### Install PostgreSQL 14
+
+```bash
 sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 apt-get update
 apt-get install postgresql-14
-Install Patroni
-bash
-Copy
-Edit
+```
+
+### Install Patroni
+
+```bash
 apt install python3-venv python3-psycopg2 libpq-dev gcc python3-dev
 python3 -m venv myenv
 source myenv/bin/activate
 pip install setuptools-rust psycopg2-binary
 pip install 'patroni[etcd]' 'patroni[raft]'
-Sample Patroni Config /etc/patroni/config.yml
-yaml
-Copy
-Edit
+```
+
+### Sample Patroni Config `/etc/patroni/config.yml`
+
+```yaml
 scope: postgres-cluster
 name: db1
 namespace: /db/
@@ -204,28 +208,35 @@ postgresql:
 
 watchdog:
   mode: automatic
-✅ Replace <DB1_IP>, <DB2_IP>, and <LB_IP> with your actual server IPs.
+```
 
-4️⃣ Initializing the Second Node
-On DB Node 2:
+> ✅ Replace `<DB1_IP>`, `<DB2_IP>`, and `<LB_IP>` with your actual server IPs.
 
-bash
-Copy
-Edit
+---
+
+## 4️⃣ Initializing the Second Node
+
+On **DB Node 2**:
+
+```bash
 pg_basebackup -h <DB1_IP> -D /var/lib/postgresql/14/main/ -U replicator -v -P --wal-method=stream
 chown -R postgres:postgres /var/lib/postgresql/14/main/
 systemctl start patroni
+```
 
-🛠 Troubleshooting
+---
+
+## 🛠 Troubleshooting
+
 | Issue                               | Solution                                                                   |
-| ----------------------------------- | -------------------------------------------------------------------------- |
-| **Missing etcd key error**          | Stop etcd, delete `/var/lib/etcd`, and restart the service                 |
-| **pg\_stat\_tmp permission denied** | `chown postgres:postgres /var/run/postgresql/14-main.pg_stat_tmp`          |
-| **Pending restart in Patroni**      | `patronictl -c /etc/patroni/config.yml restart --pending postgres-cluster` |
+|------------------------------------|----------------------------------------------------------------------------|
+| **Missing etcd key error**         | Stop etcd, delete `/var/lib/etcd`, and restart the service                 |
+| **pg_stat_tmp permission denied**  | `chown postgres:postgres /var/run/postgresql/14-main.pg_stat_tmp`          |
+| **Pending restart in Patroni**     | `patronictl -c /etc/patroni/config.yml restart --pending postgres-cluster` |
 
+---
 
+## 👨‍💻 Authors
 
-👨‍💻 Authors
-Prepared by Ali Moradi
-
-
+Prepared by **Ali Moradi**  
+System Department - Zitel
