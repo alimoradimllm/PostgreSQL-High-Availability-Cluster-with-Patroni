@@ -81,8 +81,8 @@ listen standby
 
 
 
-2️⃣ etcd Installation (on all 3 etcd nodes)
-Install from Binary
+## 2️⃣ etcd Installation (on all 3 etcd nodes)
+## Install from Binary
 bash
 Copy
 Edit
