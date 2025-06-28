@@ -239,4 +239,4 @@ systemctl start patroni
 ## 👨‍💻 Authors
 
 Prepared by **Ali Moradi**  
-System Department - Zitel
+
