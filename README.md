@@ -238,7 +238,3 @@ systemctl start patroni
 
 ---
 
-## 👨‍💻 Authors
-
-Prepared by **Ali Moradi**  
-
