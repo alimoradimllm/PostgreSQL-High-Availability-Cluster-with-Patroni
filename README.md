@@ -203,10 +203,10 @@ postgresql:
   authentication:
     superuser:
       username: postgres
-      password: z145
+      password: password
     replication:
       username: replicator
-      password: replicator_z145
+      password: replicator_pass
 
 watchdog:
   mode: automatic
