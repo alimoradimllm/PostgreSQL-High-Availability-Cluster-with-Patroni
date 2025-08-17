@@ -161,8 +161,8 @@ pip install 'patroni[etcd]' 'patroni[raft]'
 
 ```yaml
 scope: postgres-cluster
-name: db1
 namespace: /db/
+name: patroni-01
 
 restapi:
   listen: <DB1_IP>:8008
@@ -174,42 +174,64 @@ etcd:
 bootstrap:
   dcs:
     ttl: 60
-    loop_wait: 20
-    retry_timeout: 10
-    maximum_lag_on_failover: 2097152
+    loop_wait: 10
+    retry_timeout: 30
+    synchronous_mode: true
+    synchronous_mode_strict: false
+    maximum_lag_on_failover: 1048576
     postgresql:
       use_pg_rewind: true
       parameters:
         wal_level: replica
-        hot_standby: "on"
+        hot_standby: 'on'
         max_wal_senders: 10
         max_replication_slots: 10
-        wal_keep_size: 256
+        wal_keep_size: '512MB'
         max_standby_streaming_delay: '30s'
-        checkpoint_timeout: '60min'
+        checkpoint_timeout: '15min'
+        checkpoint_completion_target: 0.9
         max_wal_size: '8GB'
+        archive_mode: on
+        archive_command: 'pgbackrest --stanza=pat-test archive-push %p'
         synchronous_commit: 'remote_apply'
-        wal_compression: on
+        wal_compression: 'on'
+        archive_timeout: '60s'
+
   initdb:
     - encoding: UTF8
     - locale: en_US.UTF-8
+
+  pg_hba:
 
 postgresql:
   listen: <DB1_IP>:5432
   connect_address: <DB1_IP>:5432
   data_dir: /var/lib/postgresql/14/main
   config_dir: /etc/postgresql/14/main
-  bin_dir: /usr/lib/postgresql/14/bin
+  bin_dir: /usr/lib/postgresql/14/bin/
+
   authentication:
     superuser:
       username: postgres
-      password: password
+      password: z145
     replication:
       username: replicator
-      password: replicator_pass
+      password: replicator_z145
+
+  parameters:
+    include_if_exists: '/etc/postgresql/14/main/postgresql.base.conf'
+
+    log_directory: '/var/log/postgresql'
+    log_filename: 'postgresql-14-patroni.log'
+    log_min_messages: 'info'
+    log_min_error_statement: 'info'
+    log_connections: 'on'
+    log_disconnections: 'on'
+    log_statement: 'ddl'
 
 watchdog:
   mode: automatic
+
 ```
 
 > ✅ Replace `<DB1_IP>`, `<DB2_IP>`, and `<LB_IP>` with your actual server IPs.
